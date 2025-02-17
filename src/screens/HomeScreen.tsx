@@ -4,9 +4,11 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { Audio } from 'expo-av';  // Import Audio API from expo-av
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [contacts, setContacts] = useState<string[]>([]);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     const fetchEmergencyContacts = async () => {
@@ -16,7 +18,34 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     fetchEmergencyContacts();
   }, []);
 
+  // Function to play the siren sound
+  const playSiren = async () => {
+    try {
+      console.log("🔊 Playing siren...");
+      const { sound } = await Audio.Sound.createAsync(
+        require('../components/fire-truck-siren-29900.mp3'), // Adjust path to match your project structure
+        { shouldPlay: true, isLooping: true }
+      );
+      setSound(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("❌ Error playing siren:", error);
+    }
+  };
+
+  // Function to stop the siren
+  const stopSiren = async () => {
+    if (sound) {
+      console.log("🔇 Stopping siren...");
+      await sound.stopAsync();
+      await sound.unloadAsync(); // Free up resources
+      setSound(null);
+    }
+  };
+
   const sendSOS = async () => {
+    await playSiren(); // Play siren sound when SOS is pressed
+
     if (contacts.length === 0) {
       Alert.alert("⚠️ No Contacts", "Please add emergency contacts in Settings.");
       return;
@@ -76,6 +105,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           >
             <Text style={styles.sosText}>SOS</Text>
           </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.stopButton} onPress={stopSiren}>
+          <Text style={styles.stopText}>Stop Siren</Text>
         </TouchableOpacity>
 
         <Text style={styles.helpText}>
@@ -140,6 +173,18 @@ const styles = StyleSheet.create({
   },
   sosText: {
     fontSize: 48,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  stopButton: {
+    marginTop: 20,
+    backgroundColor: 'black',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  stopText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
   },
