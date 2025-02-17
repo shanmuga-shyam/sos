@@ -1,168 +1,215 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert, TouchableOpacity, Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Button from '../components/Button';
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+} from "react-native"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { LinearGradient } from "expo-linear-gradient"
+import { Feather } from "@expo/vector-icons"
 
 const SettingsScreen: React.FC = () => {
-  const [message, setMessage] = useState('');
-  const [contacts, setContacts] = useState<string[]>([]);
-  const [newContact, setNewContact] = useState('');
-  const [editingIndex, setEditingIndex] = useState<number | null>(null); // Track editing contact
+  const [message, setMessage] = useState("")
+  const [contacts, setContacts] = useState<string[]>([])
+  const [newContact, setNewContact] = useState("")
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const loadSettings = async () => {
-      const savedMessage = await AsyncStorage.getItem('emergencyMessage');
-      const savedContactsString = await AsyncStorage.getItem('favContacts');
+      const savedMessage = await AsyncStorage.getItem("emergencyMessage")
+      const savedContactsString = await AsyncStorage.getItem("favContacts")
 
-      setMessage(savedMessage || '');
-      setContacts(savedContactsString ? JSON.parse(savedContactsString) : []);
-    };
+      setMessage(savedMessage || "")
+      setContacts(savedContactsString ? JSON.parse(savedContactsString) : [])
+    }
 
-    loadSettings();
-  }, []);
+    loadSettings()
+  }, [])
 
   const saveSettings = async () => {
-    await AsyncStorage.setItem('emergencyMessage', message);
-    await AsyncStorage.setItem('favContacts', JSON.stringify(contacts));
-    Alert.alert("Settings Saved", "Your emergency settings have been updated.");
-  };
-
-  const sendSOS = async () => {
-    if (!message.trim()) {
-      Alert.alert("Error", "Please set an emergency message.");
-      return;
-    }
-
-    if (contacts.length === 0) {
-      Alert.alert("Error", "No emergency contacts saved.");
-      return;
-    }
-
-    const smsBody = encodeURIComponent(message);
-    const phoneNumbers = contacts.join(','); // Combine contacts
-    const smsURL = `sms:${phoneNumbers}?body=${smsBody}`;
-
-    try {
-      const supported = await Linking.canOpenURL(smsURL);
-      if (supported) {
-        await Linking.openURL(smsURL);
-      } else {
-        Alert.alert("Error", "SMS sending is not supported on this device.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to send SOS message.");
-    }
-  };
+    await AsyncStorage.setItem("emergencyMessage", message)
+    await AsyncStorage.setItem("favContacts", JSON.stringify(contacts))
+    Alert.alert("Settings Saved", "Your emergency settings have been updated.")
+  }
 
   const addOrUpdateContact = () => {
-    const phoneRegex = /^[0-9]{10}$/; // Validate a 10-digit phone number
+    const phoneRegex = /^[0-9]{10}$/
     if (!phoneRegex.test(newContact.trim())) {
-      Alert.alert("Invalid Number", "Please enter a valid 10-digit phone number.");
-      return;
+      Alert.alert("Invalid Number", "Please enter a valid 10-digit phone number.")
+      return
     }
 
     if (editingIndex !== null) {
-      // Update existing contact
-      const updatedContacts = [...contacts];
-      updatedContacts[editingIndex] = newContact.trim();
-      setContacts(updatedContacts);
-      setEditingIndex(null);
+      const updatedContacts = [...contacts]
+      updatedContacts[editingIndex] = newContact.trim()
+      setContacts(updatedContacts)
+      setEditingIndex(null)
     } else {
-      // Add new contact
-      setContacts([...contacts, newContact.trim()]);
+      setContacts([...contacts, newContact.trim()])
     }
 
-    setNewContact('');
-  };
+    setNewContact("")
+  }
 
   const deleteContact = (index: number) => {
-    const updatedContacts = contacts.filter((_, i) => i !== index);
-    setContacts(updatedContacts);
-  };
+    Alert.alert("Delete Contact", "Are you sure you want to delete this contact?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        onPress: () => {
+          const updatedContacts = contacts.filter((_, i) => i !== index)
+          setContacts(updatedContacts)
+        },
+        style: "destructive",
+      },
+    ])
+  }
 
   const editContact = (index: number) => {
-    setNewContact(contacts[index]);
-    setEditingIndex(index);
-  };
+    setNewContact(contacts[index])
+    setEditingIndex(index)
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      
-      <Text>Emergency Message:</Text>
-      <TextInput 
-        style={styles.input} 
-        value={message} 
-        onChangeText={setMessage} 
-        placeholder="Enter emergency message" 
-      />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <LinearGradient colors={["#4c669f", "#3b5998", "#192f6a"]} style={styles.background} />
+      <View style={styles.content}>
+        <Text style={styles.title}>Emergency Settings</Text>
 
-      <Text>Emergency Contacts:</Text>
-      <FlatList
-        data={contacts}
-        renderItem={({ item, index }) => (
-          <View style={styles.contactItem}>
-            <Text>{item}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={() => editContact(index)} style={styles.editButton}>
-                <Text style={styles.buttonText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => deleteContact(index)} style={styles.deleteButton}>
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
+        <Text style={styles.label}>Emergency Message:</Text>
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Enter emergency message"
+          placeholderTextColor="#a0a0a0"
+        />
+
+        <Text style={styles.label}>Emergency Contacts:</Text>
+        <FlatList
+          data={contacts}
+          renderItem={({ item, index }) => (
+            <View style={styles.contactItem}>
+              <Text style={styles.contactText}>{item}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={() => editContact(index)} style={styles.iconButton}>
+                  <Feather name="edit" size={20} color="#FFA500" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteContact(index)} style={styles.iconButton}>
+                  <Feather name="trash-2" size={20} color="#DC3545" />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
 
-      <TextInput 
-        style={styles.input} 
-        value={newContact} 
-        onChangeText={setNewContact} 
-        placeholder="Add/Edit Contact (10-digit number)" 
-        keyboardType="phone-pad"
-        maxLength={10}
-      />
-      <Button title={editingIndex !== null ? "Update Contact" : "Add Contact"} onPress={addOrUpdateContact} color={editingIndex !== null ? "#FFA500" : "#28A745"} />
+        <TextInput
+          style={styles.input}
+          value={newContact}
+          onChangeText={setNewContact}
+          placeholder="Add/Edit Contact (10-digit number)"
+          placeholderTextColor="#a0a0a0"
+          keyboardType="phone-pad"
+          maxLength={10}
+        />
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: editingIndex !== null ? "#FFA500" : "#28A745" }]}
+          onPress={addOrUpdateContact}
+        >
+          <Text style={styles.buttonText}>{editingIndex !== null ? "Update Contact" : "Add Contact"}</Text>
+        </TouchableOpacity>
 
-      <Button title="Save Settings" onPress={saveSettings} color="#007BFF" />
-
-      {/* SOS Button */}
-    </View>
-  );
-};
+        <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveSettings}>
+          <Text style={styles.buttonText}>Save Settings</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  )
+}
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
-  input: { borderWidth: 1, padding: 10, marginVertical: 5, borderRadius: 5 },
+  container: {
+    flex: 1,
+  },
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  content: {
+    padding: 20,
+    flex: 1,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  label: {
+    fontSize: 16,
+    color: "white",
+    marginBottom: 5,
+    marginTop: 15,
+  },
+  input: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 5,
+    padding: 12,
+    marginBottom: 15,
+    color: "white",
+  },
   contactItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  contactText: {
+    color: "white",
+    fontSize: 16,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
-  editButton: {
-    backgroundColor: '#FFA500',
+  iconButton: {
     padding: 5,
-    borderRadius: 5,
-    marginRight: 5,
+    marginLeft: 10,
   },
-  deleteButton: {
-    backgroundColor: '#DC3545',
-    padding: 5,
+  button: {
+    backgroundColor: "#28A745",
+    padding: 15,
     borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  saveButton: {
+    backgroundColor: "#007BFF",
+    marginTop: 20,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
-});
+})
 
-export default SettingsScreen;
+export default SettingsScreen
+

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Linking, SafeAreaView, StatusBar } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Feather } from '@expo/vector-icons';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [contacts, setContacts] = useState<string[]>([]);
@@ -50,27 +52,103 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
-        <Text style={styles.settingsText}>⚙️</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <LinearGradient
+        colors={['#FF416C', '#FF4B2B']}
+        style={styles.background}
+      />
+      <TouchableOpacity 
+        style={styles.settingsButton} 
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <Feather name="settings" size={24} color="white" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Welcome to SOS Emergency App</Text>
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>SOS Emergency</Text>
+        <Text style={styles.subtitle}>Tap the button below in case of emergency</Text>
 
-      <TouchableOpacity style={styles.sosButton} onPress={sendSOS}>
-        <Text style={styles.sosText}>🚨 SOS</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.sosButton} onPress={sendSOS}>
+          <LinearGradient
+            colors={['#FF0000', '#FF5733']}
+            style={styles.sosGradient}
+          >
+            <Text style={styles.sosText}>SOS</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <Text style={styles.helpText}>
+          This will send your location and a pre-set message to your emergency contacts.
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', position: 'relative' },
-  settingsButton: { position: 'absolute', top: 40, left: 20, padding: 10, backgroundColor: '#007BFF', borderRadius: 50 },
-  settingsText: { fontSize: 24, color: 'white', fontWeight: 'bold' },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 50 },
-  sosButton: { width: 150, height: 150, borderRadius: 75, backgroundColor: '#DC3545', justifyContent: 'center', alignItems: 'center', elevation: 10 },
-  sosText: { fontSize: 24, color: 'white', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    padding: 10,
+    zIndex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 50,
+    textAlign: 'center',
+  },
+  sosButton: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    overflow: 'hidden',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  sosGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sosText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  helpText: {
+    marginTop: 30,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+  },
 });
 
 export default HomeScreen;
