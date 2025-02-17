@@ -1,50 +1,54 @@
-# Welcome to your Expo app 👋
+<h1>Description</h1>
+<p>This is a React Native Emergency SOS App built using Expo Go. It allows users to quickly send emergency alerts, share real-time locations, and contact predefined emergency numbers.</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<h1>Screenshot</h1>
+<ul>
+  <li>
+    <h2>On Mobile</h2>
+    <img src="output\out\WhatsApp Image 2025-02-17 at 20.49.15_825b60b0.jpg" alt="Mobile View"><br><br><br><br>
+  </li>
+   <li>
+    <img src="output\out\WhatsApp Image 2025-02-17 at 20.49.15_74587a61.jpg"" alt="Mobile View"><br><br><br><br>
+  </li>
+   <li>
+    <img src="output\out\WhatsApp Image 2025-02-17 at 20.49.15_7fc79863.jpg" alt="Mobile View"><br><br><br><br>
+  </li>
+   <li>
+    <img src="output\out\WhatsApp Image 2025-02-17 at 20.49.14_c0ae9876.jpg"" alt="Mobile View"><br><br><br><br>
+  </li>
+  <li>
+    <h2>On Desktop</h2>
+    <img src="output\out\WhatsApp Image 2025-02-17 at 20.48.57_fa8d5ab1.jpg" alt="Desktop View"><br><br><br><br>
+  </li>
+</ul>
 
-## Get started
+<h1>Installation & Setup</h1>
+<ol>
+  <li>Clone the repository:</li>
+  <pre><code>git clone https://github.com/yourusername/emergency-sos-app.git
+cd emergency-sos-app</code></pre>
+  
+  <li>Install dependencies:</li>
+  <pre><code>npm install</code></pre>
 
-1. Install dependencies
+  <li>Start the development server:</li>
+  <pre><code>expo start</code></pre>
 
-   ```bash
-   npm install
-   ```
+  <li>Scan the QR code with <strong>Expo Go</strong> to test on a real device.</li>
+</ol>
 
-2. Start the app
+<h1>Features</h1>
+<ul>
+  <li><strong>One-Tap SOS Alert:</strong> Instantly send an emergency message with location details.</li>
+  <li><strong>Live Location Sharing:</strong> Automatically share real-time location with emergency contacts.</li>
+  <li><strong>Silent Mode Activation:</strong> Trigger SOS silently in risky situations.</li>
+</ul>
 
-   ```bash
-    npx expo start
-   ```
+<h1>Future Enhancements</h1>
+<ul>
+  <li>Integration with <strong>SMS & Call API</strong> for direct emergency dialing.</li>
+  <li><strong>Push notifications</strong> for emergency response updates.</li>
+  <li>Support for <strong>wearable devices</strong> to trigger SOS.</li>
+</ul>
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<p>Feel free to contribute or report issues! 🚀</p>
