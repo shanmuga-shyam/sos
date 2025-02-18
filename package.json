@@ -31,6 +31,7 @@
     "expo-location": "^18.0.6",
     "expo-mail-composer": "^14.0.2",
     "expo-router": "~4.0.17",
+    "expo-sharing": "^13.0.1",
     "expo-sms": "^13.0.1",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",

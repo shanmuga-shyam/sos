@@ -17,6 +17,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { LinearGradient } from "expo-linear-gradient"
 import { Feather } from "@expo/vector-icons"
 
+const emergencySuggestions = [
+  "I'm feeling unwell, need medical assistance.",
+  "There's a fire in the building, please send help!",
+  "I am stuck in the elevator, need assistance!",
+  "Emergency in the hostel, urgent help needed!",
+  "Security issue near the college gate, please respond!",
+]
+
 const SettingsScreen: React.FC = () => {
   const [message, setMessage] = useState("")
   const [contacts, setContacts] = useState<string[]>([])
@@ -86,51 +94,63 @@ const SettingsScreen: React.FC = () => {
       <View style={styles.content}>
         <Text style={styles.title}>Emergency Settings</Text>
 
-        <Text style={styles.label}>Emergency Message:</Text>
-        <TextInput
-          style={styles.input}
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Enter emergency message"
-          placeholderTextColor="#a0a0a0"
-        />
+        <View style={styles.card}>
+          <Text style={styles.label}>Emergency Message</Text>
+          <TextInput
+            style={styles.input}
+            value={message}
+            onChangeText={setMessage}
+            placeholder="Enter emergency message"
+            placeholderTextColor="#a0a0a0"
+            multiline
+          />
 
-        <Text style={styles.label}>Emergency Contacts:</Text>
-        <FlatList
-          data={contacts}
-          renderItem={({ item, index }) => (
-            <View style={styles.contactItem}>
-              <Text style={styles.contactText}>{item}</Text>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => editContact(index)} style={styles.iconButton}>
-                  <Feather name="edit" size={20} color="#FFA500" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteContact(index)} style={styles.iconButton}>
-                  <Feather name="trash-2" size={20} color="#DC3545" />
-                </TouchableOpacity>
+          <Text style={styles.sublabel}>Quick Messages</Text>
+          <View style={styles.suggestionsContainer}>
+            {emergencySuggestions.map((suggestion, index) => (
+              <TouchableOpacity key={index} style={styles.suggestionItem} onPress={() => setMessage(suggestion)}>
+                <Text style={styles.suggestionText}>{suggestion}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Emergency Contacts</Text>
+          <View style={styles.addContactContainer}>
+            <TextInput
+              style={styles.addContactInput}
+              value={newContact}
+              onChangeText={setNewContact}
+              placeholder="Add new contact"
+              placeholderTextColor="#a0a0a0"
+              keyboardType="phone-pad"
+            />
+            <TouchableOpacity style={styles.addContactButton} onPress={addOrUpdateContact}>
+              <Feather name={editingIndex !== null ? "check" : "plus"} size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={contacts}
+            renderItem={({ item, index }) => (
+              <View style={styles.contactItem}>
+                <Text style={styles.contactText}>{item}</Text>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity onPress={() => editContact(index)} style={styles.iconButton}>
+                    <Feather name="edit-2" size={16} color="#4c669f" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteContact(index)} style={styles.iconButton}>
+                    <Feather name="trash-2" size={16} color="#DC3545" />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          value={newContact}
-          onChangeText={setNewContact}
-          placeholder="Add/Edit Contact (10-digit number)"
-          placeholderTextColor="#a0a0a0"
-          keyboardType="phone-pad"
-          maxLength={10}
-        />
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: editingIndex !== null ? "#FFA500" : "#28A745" }]}
-          onPress={addOrUpdateContact}
-        >
-          <Text style={styles.buttonText}>{editingIndex !== null ? "Update Contact" : "Add Contact"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={saveSettings}>
+        <TouchableOpacity style={styles.saveButton} onPress={saveSettings}>
           <Text style={styles.buttonText}>Save Settings</Text>
         </TouchableOpacity>
       </View>
@@ -150,63 +170,105 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   content: {
-    padding: 20,
+    padding: 16,
     flex: 1,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "white",
     marginBottom: 20,
     textAlign: "center",
   },
+  card: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
   label: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "white",
+    marginBottom: 12,
+  },
+  sublabel: {
     fontSize: 16,
     color: "white",
-    marginBottom: 5,
-    marginTop: 15,
+    marginTop: 16,
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 15,
     color: "white",
+    minHeight: 50,
+  },
+  suggestionsContainer: {
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  suggestionItem: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    padding: 12,
+    marginBottom: 1,
+  },
+  suggestionText: {
+    color: "#e0e0e0",
+    fontSize: 15,
   },
   contactItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 5,
-    marginBottom: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    marginBottom: 8,
   },
   contactText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 15,
   },
   buttonContainer: {
     flexDirection: "row",
+    gap: 12,
   },
   iconButton: {
-    padding: 5,
-    marginLeft: 10,
+    padding: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 6,
   },
-  button: {
-    backgroundColor: "#28A745",
-    padding: 15,
-    borderRadius: 5,
+  addContactContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
+    gap: 8,
+  },
+  addContactInput: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 8,
+    padding: 12,
+    color: "white",
+  },
+  addContactButton: {
+    backgroundColor: "#4c669f",
+    width: 44,
+    borderRadius: 8,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
   },
   saveButton: {
-    backgroundColor: "#007BFF",
-    marginTop: 20,
+    backgroundColor: "#4c669f",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: "auto",
   },
   buttonText: {
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "600",
     fontSize: 16,
   },
 })
