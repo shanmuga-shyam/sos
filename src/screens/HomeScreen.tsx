@@ -4,26 +4,42 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import { Audio } from 'expo-av';  // Import Audio API from expo-av
+import { Audio } from 'expo-av';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [contacts, setContacts] = useState<string[]>([]);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [bssid, setBssid] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmergencyContacts = async () => {
       const contactsString = await AsyncStorage.getItem('favContacts');
       setContacts(contactsString ? JSON.parse(contactsString) : []);
     };
+
     fetchEmergencyContacts();
   }, []);
 
-  // Function to play the siren sound
+  useEffect(() => {
+    fetchBSSID();
+  }, []);
+
+  const fetchBSSID = async () => {
+    try {
+      const response = await fetch("http://172.16.14.12:5000/bssid");
+      const data = await response.json();
+      setBssid(data.bssid);
+      console.log("Fetched BSSID:", data.bssid);
+    } catch (error) {
+      console.error('Error fetching BSSID:', error);
+    }
+  };
+
   const playSiren = async () => {
     try {
       console.log("🔊 Playing siren...");
       const { sound } = await Audio.Sound.createAsync(
-        require('../components/fire-truck-siren-29900.mp3'), // Adjust path to match your project structure
+        require('../components/fire-truck-siren-29900.mp3'),
         { shouldPlay: true, isLooping: true }
       );
       setSound(sound);
@@ -33,18 +49,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
 
-  // Function to stop the siren
   const stopSiren = async () => {
     if (sound) {
       console.log("🔇 Stopping siren...");
       await sound.stopAsync();
-      await sound.unloadAsync(); // Free up resources
+      await sound.unloadAsync();
       setSound(null);
     }
   };
 
   const sendSOS = async () => {
-    await playSiren(); // Play siren sound when SOS is pressed
+    await playSiren();
 
     if (contacts.length === 0) {
       Alert.alert("⚠️ No Contacts", "Please add emergency contacts in Settings.");
@@ -62,6 +77,21 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     let message = (await AsyncStorage.getItem('emergencyMessage')) || "Emergency! Please help.";
     let finalMessage = `${message} \n\n📍 Location: ${locationLink}`;
+
+    // Predefined BSSID locations
+    const bssidLocations: Record<string, string> = {
+      "de:95:dd:73:77:e1": "reaper",
+      "5c:62:8b:e3:5d:a6": "parthasarathy-auditorium",
+      "16:5d:f6:fd:f7:3d": "sujan",
+      "5c:62:8b:e3:60:0b": "parthasarathy-auditorium"
+    };
+
+    // Append BSSID location if available
+    if (bssid) {
+      finalMessage += `\n\nBSSID Location: ${bssidLocations[bssid] || "Unknown"}`;
+    }
+
+    console.log(finalMessage);
 
     const smsBody = encodeURIComponent(finalMessage);
     const phoneNumbers = contacts.join(',');
@@ -83,14 +113,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={['#FF416C', '#FF4B2B']}
-        style={styles.background}
-      />
-      <TouchableOpacity 
-        style={styles.settingsButton} 
-        onPress={() => navigation.navigate('Settings')}
-      >
+      <LinearGradient colors={['#FF416C', '#FF4B2B']} style={styles.background} />
+      
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
         <Feather name="settings" size={24} color="white" />
       </TouchableOpacity>
 
@@ -99,10 +124,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.subtitle}>Tap the button below in case of emergency</Text>
 
         <TouchableOpacity style={styles.sosButton} onPress={sendSOS}>
-          <LinearGradient
-            colors={['#FF0000', '#FF5733']}
-            style={styles.sosGradient}
-          >
+          <LinearGradient colors={['#FF0000', '#FF5733']} style={styles.sosGradient}>
             <Text style={styles.sosText}>SOS</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -114,6 +136,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={styles.helpText}>
           This will send your location and a pre-set message to your emergency contacts.
         </Text>
+
+        {bssid && (
+          <Text style={styles.bssidText}>Current BSSID: {bssid}</Text>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -190,6 +216,12 @@ const styles = StyleSheet.create({
   },
   helpText: {
     marginTop: 30,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+  },
+  bssidText: {
+    marginTop: 20,
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
